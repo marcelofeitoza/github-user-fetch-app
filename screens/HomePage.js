@@ -11,50 +11,26 @@ import {
 import { fetchGithub } from "../services/githubService";
 
 export default function HomePage({ navigation }) {
-  const [userData, setUserData] = useState([]);
   const [textInputValue, setTextInputValue] = useState("");
-
-  const fetchUserData = async (username) => {
-    await fetchGithub(username).then((data) => {
-      setUserData(data);
-      clearTextInput();
-    });
-
-    //console.log(response);
-
-    userData.length > 0
-      ? navigation.navigate("UserDetails", { userData })
-      : null;
-  };
 
   const clearTextInput = useCallback(() => {
     setTextInputValue("");
   }, []);
 
-  const pressHandler = async () => {
-    if (textInputValue !== null) {
-      console.log(textInputValue);
-
-      await fetchUserData(textInputValue);
-
-      const userDataObject = userData[0];
-
-      setTimeout(() => {
-        navigation.navigate("UserInformation", {
-          userDataObject,
-        });
-        console.log(textInputValue + "123");
-      }, 1500);
-
-      //clear textInputValue after submit
+  const pressHandler = () => {
+    if (textInputValue !== "") {
+      navigation.navigate("UserInformation", {
+        usernameToFetch: textInputValue,
+      });
     } else {
       alert("Please enter a username");
     }
-  };
+  }
+
 
   useEffect(() => {
     clearTextInput();
-    setUserData([]);
+    console.log("cleared text input: " + textInputValue);
   }, []);
 
   return (
@@ -77,11 +53,11 @@ export default function HomePage({ navigation }) {
             onChangeText={(text) => setTextInputValue(text)}
             value={textInputValue}
           />
-
-          <TouchableOpacity onPress={pressHandler} style={styles.addWrapper}>
-            <Text style={styles.submitText}>Submit</Text>
-          </TouchableOpacity>
         </KeyboardAvoidingView>
+
+        <TouchableOpacity onPress={pressHandler} style={styles.addWrapper}>
+          <Text style={styles.submitText}>Submit</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

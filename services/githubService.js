@@ -2,8 +2,6 @@ import axios from 'axios';
 
 export const fetchGithub = async (username) => {
   // https://api.github.com/users/marcelofeitoza
-
-  
   try {
     // where the api call goes
     const response = await axios.get(
@@ -28,3 +26,4 @@ export const fetchUserRepositories = async (username) => {
     console.log(e);
   }
 };
+
