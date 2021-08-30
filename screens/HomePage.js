@@ -30,7 +30,6 @@ export default function HomePage({ navigation }) {
 
   useEffect(() => {
     clearTextInput();
-    console.log("cleared text input: " + textInputValue);
   }, []);
 
   return (

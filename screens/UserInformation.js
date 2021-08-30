@@ -12,47 +12,8 @@ import {
 } from "react-native";
 import { fetchGithub, fetchUserRepositories } from "../services/githubService";
 
-export default function UserInformation({ navigation }) {
-  const [userRepositories, setUserRepositories] = useState([]);
-
-  const clearUserRepositories = useCallback(() => {
-    setUserRepositories([]);
-  }, []);
-
-  const pressHandler = () => {
-    //clear userRepositories and userInfo
-    clearUserRepositories();
-    navigation.goBack();
-  };
-
-  const fetchRepositoriesData = async (username) => {
-    const data = await fetchUserRepositories(username);
-    setUserRepositories(data);
-  };
-
-  const [userData, setUserData] = useState([]);
-
-  const fetchUserData = async (username) => {
-    const data = await fetchGithub(username);
-    setUserData(data);
-  };
-
-  const usernameToFetch = navigation.getParam("usernameToFetch");
-  useEffect(() => {
-    fetchUserData(usernameToFetch);
-    fetchRepositoriesData(usernameToFetch);
-  }, []);
-
-  //console.log(userData.login);
-  //console.log(userRepositories);
-
+const AllUserDataScreen = ({ userData, userRepositories }) => {
   return (
-    /* 
-    <Text style={styles.mainHeader}>
-      {usernameToFetch !== undefined ? usernameToFetch : "User not found"}
-    </Text>
-    */
-
     <View style={styles.mainContainer}>
       <StatusBar style="auto" barStyle="light-content" />
       <View style={styles.container}>
@@ -155,6 +116,159 @@ export default function UserInformation({ navigation }) {
       </TouchableOpacity>
     </View>
   );
+};
+
+export default function UserInformation({ navigation }) {
+  const [userRepositories, setUserRepositories] = useState([]);
+
+  const clearUserRepositories = useCallback(() => {
+    setUserRepositories([]);
+  }, []);
+
+  const pressHandler = () => {
+    //clear userRepositories and userInfo
+    clearUserRepositories();
+    navigation.goBack();
+  };
+
+  const fetchRepositoriesData = async (username) => {
+    const data = await fetchUserRepositories(username);
+    setUserRepositories(data);
+  };
+
+  const [userData, setUserData] = useState([]);
+
+  const fetchUserData = async (username) => {
+    const data = await fetchGithub(username);
+    setUserData(data);
+  };
+
+  const usernameToFetch = navigation.getParam("usernameToFetch");
+  useEffect(() => {
+    fetchUserData(usernameToFetch);
+    fetchRepositoriesData(usernameToFetch);
+  }, []);
+
+  if (userData === undefined) {
+    alert("User not found");
+    setTimeout(() => {
+      navigation.goBack();
+    }, 1250);
+  }
+
+  if (userRepositories === undefined) {
+    alert("User not found");
+    setTimeout(() => {
+      navigation.goBack();
+    }, 1250);
+    return null;
+  } else {
+    return (
+      <View style={styles.mainContainer}>
+        <StatusBar style="auto" barStyle="light-content" />
+        <View style={styles.container}>
+          <View style={styles.allData}>
+            <View style={styles.userBasicInfo}>
+              <Image
+                source={{ uri: userData.avatar_url }}
+                style={styles.userPicture}
+              />
+
+              <View style={styles.imageAndSideText}>
+                <View>
+                  <Text style={[{ width: "100%" }, styles.mainHeader]}>
+                    Name:
+                  </Text>
+                  <Text style={styles.mainUserInfo}>{userData.name}</Text>
+                </View>
+
+                <View>
+                  <Text style={styles.mainHeader}>Username:</Text>
+                  <Text style={styles.mainUserInfo}>{userData.login}</Text>
+                </View>
+
+                <View>
+                  <Text style={styles.mainHeader}>Location:</Text>
+                  <Text style={styles.mainUserInfo}>{userData.location}</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.userStats1}>
+              <View style={styles.userDataView1}>
+                <Text style={styles.header}>Repostories:</Text>
+                <Text style={styles.userInfo}>{userData.public_repos}</Text>
+              </View>
+
+              <View style={styles.userDataView1}>
+                <Text style={styles.header}>Following:</Text>
+                <Text style={styles.userInfo}>{userData.following}</Text>
+              </View>
+
+              <View style={styles.userDataView1}>
+                <Text style={styles.header}>Followers:</Text>
+                <Text style={styles.userInfo}>{userData.followers}</Text>
+              </View>
+
+              <View style={styles.userDataView1}>
+                <Text style={styles.header}>Id:</Text>
+                <Text style={styles.userInfo}>{userData.id}</Text>
+              </View>
+            </View>
+
+            <View style={styles.userStats2}>
+              <View style={styles.userDataView2}>
+                <Text style={styles.header}>Company:</Text>
+                <Text numberOfLines={2} style={styles.userInfo}>
+                  {userData.company ? userData.company : "No company"}
+                </Text>
+              </View>
+
+              <View style={styles.userDataView2}>
+                <Text style={styles.header}>Type:</Text>
+                <Text style={styles.userInfo}>{userData.type}</Text>
+              </View>
+
+              <View style={styles.userDataView2}>
+                <Text style={styles.header}>Created at:</Text>
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode="clip"
+                  style={styles.userInfo}
+                >
+                  {userData.created_at}
+                </Text>
+              </View>
+
+              <View style={styles.emptyDataView2}>
+                <Text style={styles.header}></Text>
+                <Text style={styles.userInfo}></Text>
+              </View>
+            </View>
+
+            <View style={styles.repositoriesListContainer}>
+              <Text style={styles.header}>{userData.login}'s Repositories</Text>
+              <ScrollView style={styles.repositoriesList}>
+                {userRepositories.map((repository, index) => {
+                  return (
+                    <View key={index} style={styles.repository}>
+                      <Text style={styles.repositoryName}>
+                        {repository.name}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity onPress={pressHandler} style={styles.returnButton}>
+          <Text style={styles.returnText}>Return</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -310,9 +424,10 @@ const styles = StyleSheet.create({
   },
   repositoryName: {
     fontSize: 14,
-    paddingVertical: 1,
+    paddingTop: 2,
     paddingLeft: 4,
     marginVertical: 1,
     color: "#fff",
+    paddingBottom: 4,
   },
 });
